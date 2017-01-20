@@ -48,6 +48,8 @@
   <build_depend>rospy</build_depend>
   <build_depend>std_msgs</build_depend>
   <build_depend>nav_msgs</build_depend>
+  <build_depend>ardrone_autonomy</build_depend>
+
 
 
   <!-- Dependencies needed after this package is compiled. -->
@@ -58,6 +60,7 @@
   <run_depend>rospy</run_depend>
   <run_depend>std_msgs</run_depend>
   <run_depend>nav_msgs</run_depend>
+  <run_depend>ardrone_autonomy</run_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>

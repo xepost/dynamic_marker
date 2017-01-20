@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
     rospy
     std_msgs
     nav_msgs
+    ardrone_autonomy
 )
 
 #For Qt
@@ -53,18 +54,17 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
+add_message_files(
+   FILES
+   set_marker.msg
+   set_marker_response.msg
+ )
 
 ## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
+add_service_files(
+   FILES
+   SetMarker.srv
+   )
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -74,7 +74,7 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate added messages and services with any dependencies listed here
-#generate_messages(DEPENDENCIES  std_msgs)
+generate_messages(DEPENDENCIES  std_msgs)
 
 ## Generate dynamic parameters
 generate_dynamic_reconfigure_options(
@@ -94,7 +94,7 @@ generate_dynamic_reconfigure_options(
 catkin_package(
   INCLUDE_DIRS include
 #  LIBRARIES coop_uv
-  CATKIN_DEPENDS roscpp rospy std_msgs geometry_msgs nav_msgs
+  CATKIN_DEPENDS roscpp rospy std_msgs geometry_msgs nav_msgs ardrone_autonomy
 #  DEPENDS system_lib
 )
 
@@ -194,3 +194,4 @@ target_link_libraries(decision_process ${catkin_LIBRARIES})
 file(GLOB_RECURSE QT_MOC RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS include/dynamic_marker/*.hpp)
 FILE(GLOB_RECURSE INC_ALL "include/dynamic_marker/*.hpp")
 FILE(GLOB_RECURSE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS src/*.cpp)
+
