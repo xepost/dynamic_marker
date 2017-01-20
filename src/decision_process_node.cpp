@@ -21,7 +21,7 @@ DecisionProcessNode::DecisionProcessNode() {
 
 
   params.param<std::string>("marker_status_topic", s, "/dynamic_marker/set_marker_response");
-  set_marker_response_sub_ = nh_.subscribe(s, 1, &DecisionProcessNode::marker_response_cb, this,
+  set_marker_response_sub_ = nh_.subscribe(s, 1, &DecisionProcessNode::set_marker_response_cb, this,
                                    ros::TransportHints().tcpNoDelay());
 
   // Published topics
@@ -37,14 +37,25 @@ DecisionProcessNode::DecisionProcessNode() {
       dynamic_marker::dynamic_param_configConfig>::CallbackType f;
   f = boost::bind(&DecisionProcessNode::dynamic_reconfigure_callback, this, _1, _2);
   server_.setCallback(f);
+
+  // The marker display should start with an Aruco single marker
+  // using the same default values as ar_sys
+  display_marker_updated_ = true;
+  ar_sys_marker_updated_ = true;
+  set_marker_msg_.message_id = 0;
 }
 
-void DecisionProcessNode::marker_response_cb(const std_msgs::String marker_status_msg){
-  if (marker_status_msg.data == "OK"){
-    // Marker is already updated on the display
-    // Measure time until this message
-    // Decide to liberate the lock for sending new marker_size
-    //marker_size_pub_lock_ = false;
+void DecisionProcessNode::set_marker_response_cb(const dynamic_marker::set_marker_response marker_response_msg){
+  ROS_INFO("Marker is updated on the display");
+  if (marker_response_msg.result && marker_response_msg.message_id == set_marker_msg_.message_id){
+    //The marker was succesfully updated on the screen
+    display_marker_updated_ = true;
+    ar_sys_marker_updated_ = true; //!TODO: (ROSA) this doesnt belong here, it should be made valid by the ar_sys node using another topic or service response (your implementation)
+
+  } else{
+    //!TODO do something really smart in case that fails
+    ROS_DEBUG("display screen couldnt update the marker with the current configuration:");
+    ROS_DEBUG("dynamic_marker_screen response: %s",marker_response_msg.message.c_str());
   }
 }
 
@@ -53,29 +64,27 @@ void DecisionProcessNode::ar_sys_marker_pose_cb(const geometry_msgs::PoseStamped
   if (set_marker_msg_.marker_family == aruco_single ||
       set_marker_msg_.marker_family == aruco_multi){
 
-    //double z = marker_pose_msg.pose.position.z;
+    //We check here that the current marker is being displayed on the screen
+    // and that ar_sys is already configured for the new marker
 
-
-    //publish the pose to the output pose topic
-    output_pose_pub_.publish(marker_pose_msg);
-
-
+    if(display_marker_updated_ && ar_sys_marker_updated_){
+      //publish the pose to the output pose topic
+      output_pose_pub_.publish(marker_pose_msg);
+      //!TODO: RAUL for tracking also it is necessary to update the trasnformation tree
+    }
   }
-
-
 }
 
 void DecisionProcessNode::whycon_marker_pose_cb(const geometry_msgs::PoseStamped marker_pose_msg){
   // we check first that we are indeed tracking an whycon marker
   if (set_marker_msg_.marker_family == whycon){
-
-    //double z = marker_pose_msg.pose.position.z;
-
-    //publish the pose to the output pose topic
-    output_pose_pub_.publish(marker_pose_msg);
-
+    if(display_marker_updated_){
+      //publish the pose to the output pose topic
+      output_pose_pub_.publish(marker_pose_msg);
+      //!TODO: RAUL for tracking also it is necessary to update the trasnformation tree
+      //! Since whycon doesnt provide POSE we can use the measurements of the quadcopter IMU for angles
+    }
   }
-
 }
 
 
@@ -122,30 +131,28 @@ void DecisionProcessNode::observer_distance_cb(const ardrone_autonomy::navdata_a
 
   // We define that the pose form ar_sys as invalid until we get confirmation
   display_marker_updated_ = false;
-  ar_sys_pose_valid_ = false;    //!TODO: (rosa) change this variable to true when ar_sys changes the configuration
+  ar_sys_marker_updated_ = false;    //!TODO: (rosa) change this variable to true when ar_sys changes the configuration
 
   // Set the marker in the display screen server
+  ROS_INFO("Sending new marker to display");
+  set_marker_msg_.message_id ++; //! TODO remember to do this everytime for checking the ID maybe a function to force it
   set_marker_pub_.publish(set_marker_msg_);
-
-
-
 
   // Set the marker in the ar_sys node
 
-
-
-
-  //!TODO: ROSA
-
+  //!TODO: ROSA use a publisher or a services to tell ar_sys about the new marker.
 }
 
 
 
 void DecisionProcessNode::dynamic_reconfigure_callback(
   dynamic_marker::dynamic_param_configConfig& config, uint32_t level) {
-  ROS_INFO("Reconfigure Request: %f", config.marker_size);
-  marker_size_ = config.marker_size;
-  std_msgs::Int32 marker_size_msg;
-  marker_size_msg.data = marker_size_;
-  set_marker_pub_.publish(marker_size_msg);
+  ROS_INFO("Reconfigure Request: %d", config.marker_size);
+  //!TODO: (raul/rosa) add the other parameters of the marker to the dynamic reconfigure cfg
+  set_marker_msg_.marker_family = config.marker_family;
+  set_marker_msg_.marker_id = 88;
+  set_marker_msg_.marker_size = config.marker_size;;
+  ROS_INFO("Sending new marker to display");
+  set_marker_msg_.message_id ++; //! TODO remember to do this everytime for checking the ID
+  set_marker_pub_.publish(set_marker_msg_);
 }

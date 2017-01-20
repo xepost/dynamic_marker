@@ -22,7 +22,7 @@ class DecisionProcessNode {
 
   // ROS message callbacks
   void observer_distance_cb(const ardrone_autonomy::navdata_altitude altitude_msg); // Distance in milimiters between the observer (camera) and the marker
-  void marker_response_cb(const std_msgs::String marker_status_msg);
+  void set_marker_response_cb(const dynamic_marker::set_marker_response marker_response_msg);
   void ar_sys_marker_pose_cb(const geometry_msgs::PoseStamped marker_pose_msg);
   void whycon_marker_pose_cb(const geometry_msgs::PoseStamped marker_pose_msg);
   void dynamic_reconfigure_callback(
@@ -31,20 +31,21 @@ class DecisionProcessNode {
 
   void measure_latency(void);
 
+
+
  private:
   ros::Subscriber observer_distance_sub_;
   ros::Subscriber set_marker_response_sub_;    //TODO: remove by using a service
   ros::Subscriber ar_sys_marker_pose_sub_;
   ros::Subscriber whycon_marker_pose_sub_;
 
-  ros::Publisher set_marker_pub_;
+
   ros::Publisher output_pose_pub_;
+  ros::Publisher set_marker_pub_;
 
   // dynamic reconfigure server
   dynamic_reconfigure::Server<dynamic_marker::dynamic_param_configConfig>
       server_;
-
-  double marker_size_;
 
   enum marker_family_enum_ { whycon, aruco_single, aruco_multi, pitag};
   dynamic_marker::set_marker set_marker_msg_;
@@ -53,7 +54,7 @@ class DecisionProcessNode {
   // are using the must current marker
 
   bool display_marker_updated_;
-  bool ar_sys_pose_valid_;
+  bool ar_sys_marker_updated_;
 };
 
 #endif  // DECISIONPROCESSNODE_HPP
