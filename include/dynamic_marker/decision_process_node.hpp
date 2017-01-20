@@ -8,7 +8,8 @@
 #include "std_msgs/String.h"
 #include "geometry_msgs/PoseStamped.h"
 #include "ardrone_autonomy/navdata_altitude.h"
-#include "dynamic_marker/SetMarker.h"
+#include "dynamic_marker/set_marker.h"
+#include "dynamic_marker/set_marker_response.h"
 
 #include <dynamic_reconfigure/server.h>
 #include <dynamic_marker/dynamic_param_configConfig.h>
@@ -36,7 +37,6 @@ class DecisionProcessNode {
 
   ros::Publisher marker_size_pub_;
 
-  ros::ServiceClient set_marker_srv_client_;
   // dynamic reconfigure server
   dynamic_reconfigure::Server<dynamic_marker::dynamic_param_configConfig>
       server_;
@@ -46,4 +46,5 @@ class DecisionProcessNode {
 };
 
 #endif  // DECISIONPROCESSNODE_HPP
+
 

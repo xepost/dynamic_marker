@@ -25,7 +25,6 @@ DecisionProcessNode::DecisionProcessNode() {
   marker_size_pub_ = nh_.advertise<std_msgs::Int32>(s, 1);
 
   // Services
-  set_marker_srv_client_ = nh_.serviceClient<dynamic_marker::SetMarker>("/dynamic_marker/set_marker");
 
 
   // Dynamic parameter reconfigure
@@ -50,7 +49,7 @@ void DecisionProcessNode::marker_status_cb(const std_msgs::String marker_status_
 void DecisionProcessNode::marker_pose_cb(const geometry_msgs::PoseStamped marker_pose_msg){
   double z = marker_pose_msg.pose.position.z;
   int marker_size;
-
+  /*
   if (z > 0.6){
       marker_size = 150;
   } else {
@@ -67,6 +66,7 @@ void DecisionProcessNode::marker_pose_cb(const geometry_msgs::PoseStamped marker
     req.marker_size = marker_size;
     set_marker_srv_client_.call(req,res);
   }
+  */
 }
 
 
@@ -88,9 +88,3 @@ void DecisionProcessNode::dynamic_reconfigure_callback(
   marker_size_msg.data = marker_size_;
   marker_size_pub_.publish(marker_size_msg);
 }
-
-
-
-// Debo esperar por confirmación desde el display si es que quiero mandar un nuevo tamaño de marcador
-// La forma mas sencilla es implementar un delay para no estar cambiando tanto de marcador
-// En ar_sys debo buscar la forma de modificar el tamaño del marcador dinámicamente
