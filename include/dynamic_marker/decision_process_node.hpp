@@ -38,6 +38,7 @@ class DecisionProcessNode {
   ros::Subscriber whycon_marker_pose_sub_;
 
   ros::Publisher set_marker_pub_;
+  ros::Publisher output_pose_pub_;
 
   // dynamic reconfigure server
   dynamic_reconfigure::Server<dynamic_marker::dynamic_param_configConfig>
@@ -52,10 +53,7 @@ class DecisionProcessNode {
   // are using the must current marker
 
   bool display_marker_updated_;
-  bool ar_sys_marker_updated_;
   bool ar_sys_pose_valid_;
-  bool whycon_pose_valid_;
-
 };
 
 #endif  // DECISIONPROCESSNODE_HPP

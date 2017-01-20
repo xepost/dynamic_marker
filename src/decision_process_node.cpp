@@ -28,6 +28,10 @@ DecisionProcessNode::DecisionProcessNode() {
   params.param<std::string>("set_marker_topic", s, "/dynamic_marker/set_marker");
   set_marker_pub_ = nh_.advertise<dynamic_marker::set_marker>(s, 1);
 
+  // Published topics
+  params.param<std::string>("output_pose_topic", s, "/dynamic_marker/pose");
+  output_pose_pub_ = nh_.advertise<geometry_msgs::PoseStamped>(s, 1);
+
   // Dynamic parameter reconfigure
   dynamic_reconfigure::Server<
       dynamic_marker::dynamic_param_configConfig>::CallbackType f;
@@ -45,11 +49,32 @@ void DecisionProcessNode::marker_response_cb(const std_msgs::String marker_statu
 }
 
 void DecisionProcessNode::ar_sys_marker_pose_cb(const geometry_msgs::PoseStamped marker_pose_msg){
-  double z = marker_pose_msg.pose.position.z;
+  // we check first that we are indeed tracking an ar_sys marker
+  if (set_marker_msg_.marker_family == aruco_single ||
+      set_marker_msg_.marker_family == aruco_multi){
+
+    //double z = marker_pose_msg.pose.position.z;
+
+
+    //publish the pose to the output pose topic
+    output_pose_pub_.publish(marker_pose_msg);
+
+
+  }
+
 
 }
 
 void DecisionProcessNode::whycon_marker_pose_cb(const geometry_msgs::PoseStamped marker_pose_msg){
+  // we check first that we are indeed tracking an whycon marker
+  if (set_marker_msg_.marker_family == whycon){
+
+    //double z = marker_pose_msg.pose.position.z;
+
+    //publish the pose to the output pose topic
+    output_pose_pub_.publish(marker_pose_msg);
+
+  }
 
 }
 
@@ -95,13 +120,20 @@ void DecisionProcessNode::observer_distance_cb(const ardrone_autonomy::navdata_a
   set_marker_msg_.marker_size = altitude*150/600; //with our camera 600 mm is a good distance to recognize a 150 mm marker
 
 
+  // We define that the pose form ar_sys as invalid until we get confirmation
+  display_marker_updated_ = false;
+  ar_sys_pose_valid_ = false;    //!TODO: (rosa) change this variable to true when ar_sys changes the configuration
+
   // Set the marker in the display screen server
   set_marker_pub_.publish(set_marker_msg_);
 
-  // We define that all the poses are invalid until we get confirmation
+
 
 
   // Set the marker in the ar_sys node
+
+
+
 
   //!TODO: ROSA
 
