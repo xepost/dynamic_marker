@@ -131,7 +131,7 @@ add_executable(decision_process ${DECISIONPROCESS_SOURCE_FILES} ${DECISIONPROCES
 #add_dependencies(pid_control ardrone_autonomy)
 #add_dependencies(test_controller ardrone_autonomy)
 
-add_dependencies(decision_process ${PROJECT_NAME}_gencfg)
+add_dependencies(decision_process ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(decision_process ${catkin_LIBRARIES})
