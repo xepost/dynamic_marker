@@ -38,6 +38,10 @@ DecisionProcessNode::DecisionProcessNode() {
   f = boost::bind(&DecisionProcessNode::dynamic_reconfigure_callback, this, _1, _2);
   server_.setCallback(f);
 
+
+  // Service in ar_sys to change the marker settings
+  ar_sys_board_service_client_ = nh_.serviceClient<ar_sys::Board_service>("/ar_multi_boards/changeboard");
+
   // The marker display should start with an Aruco single marker
   // using the same default values as ar_sys
   display_marker_updated_ = true;
@@ -149,10 +153,31 @@ void DecisionProcessNode::dynamic_reconfigure_callback(
   dynamic_marker::dynamic_param_configConfig& config, uint32_t level) {
   ROS_INFO("Reconfigure Request: %d", config.marker_size);
   //!TODO: (raul/rosa) add the other parameters of the marker to the dynamic reconfigure cfg
-  set_marker_msg_.marker_family = config.marker_family;
-  set_marker_msg_.marker_id = 88;
-  set_marker_msg_.marker_size = config.marker_size;;
-  ROS_INFO("Sending new marker to display");
-  set_marker_msg_.message_id ++; //! TODO remember to do this everytime for checking the ID
-  set_marker_pub_.publish(set_marker_msg_);
+  set_new_fiducial_marker(config.marker_family, config.marker_id, config.marker_size,
+                          config.marker_frame_name);
 }
+
+
+void DecisionProcessNode::set_new_fiducial_marker(int marker_family, int marker_id, double marker_size, std::string marker_frame_name){
+    set_marker_msg_.marker_family = marker_family;
+    set_marker_msg_.marker_id = marker_id;
+    set_marker_msg_.marker_size = marker_size;
+    ROS_INFO("Sending new marker to display");
+    set_marker_msg_.message_id ++; //! TODO remember to do this everytime for checking the ID
+    set_marker_pub_.publish(set_marker_msg_);
+
+    if(marker_family == 0){
+      ROS_INFO("Sending new marker to Whycon detection system");
+      ROS_ERROR("Alert! Not yet implemented");
+
+    } else if (marker_family == 1 || marker_family == 2){
+      ROS_INFO("Sending new marker to Aruco detection system (ar_sys)");
+      ar_sys::Board_serviceRequest req;
+      ar_sys::Board_serviceResponse response;
+      req.marker_family = marker_family;
+      req.marker_id = marker_id;
+      req.marker_name = marker_frame_name;
+      req.marker_size = marker_size;
+      ar_sys_board_service_client_.call(req, response);
+    }
+  }

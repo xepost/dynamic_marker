@@ -8,8 +8,13 @@
 #include "std_msgs/String.h"
 #include "geometry_msgs/PoseStamped.h"
 #include "ardrone_autonomy/navdata_altitude.h"
+
 #include "dynamic_marker/set_marker.h"
 #include "dynamic_marker/set_marker_response.h"
+
+#include "ar_sys/Board_service.h"
+#include "ar_sys/Board_serviceResponse.h"
+
 
 #include <dynamic_reconfigure/server.h>
 #include <dynamic_marker/dynamic_param_configConfig.h>
@@ -25,6 +30,8 @@ class DecisionProcessNode {
   void set_marker_response_cb(const dynamic_marker::set_marker_response marker_response_msg);
   void ar_sys_marker_pose_cb(const geometry_msgs::PoseStamped marker_pose_msg);
   void whycon_marker_pose_cb(const geometry_msgs::PoseStamped marker_pose_msg);
+  void set_new_fiducial_marker(int marker_family, int marker_id, double marker_size, std::string marker_frame_name);
+
   void dynamic_reconfigure_callback(
      dynamic_marker::dynamic_param_configConfig& config, uint32_t level);
 
@@ -38,6 +45,8 @@ class DecisionProcessNode {
   ros::Subscriber set_marker_response_sub_;    //TODO: remove by using a service
   ros::Subscriber ar_sys_marker_pose_sub_;
   ros::Subscriber whycon_marker_pose_sub_;
+
+  ros::ServiceClient ar_sys_board_service_client_;
 
 
   ros::Publisher output_pose_pub_;
