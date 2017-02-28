@@ -9,7 +9,7 @@ int main(int argc, char* argv[]) {
   ros::init(argc, argv, "decision_process");  // Name of the node
   DecisionProcessNode Node;
 
-   int32_t looprate = 60; //hz
+   int32_t looprate = 1000; //hz
    ros::Rate loop_rate(looprate);
 
   // ros::spin();

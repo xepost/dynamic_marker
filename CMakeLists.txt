@@ -13,6 +13,8 @@ find_package(catkin REQUIRED COMPONENTS
     std_msgs
     nav_msgs
     ardrone_autonomy
+    tf2
+    tf2_ros
 )
 
 #For Qt
