@@ -70,9 +70,6 @@ DecisionProcessNode::DecisionProcessNode() {
 
   calc_ideal_marker_size_(fovx, 0.1, 0.25, 0.10, marker_ideal_size);
 
-
-
-
 }
 
 
@@ -108,26 +105,19 @@ void DecisionProcessNode::ar_sys_marker_transform_cb(const geometry_msgs::Transf
 
 
       //!TODO remove the following, only valid for experiment 2
+      //!float scale_change = current_marker_size_/0.12; //default marker size
+      //!tf_msg_out.transform.translation.x = tf_msg_out.transform.translation.x*scale_change;
+      //!tf_msg_out.transform.translation.y = tf_msg_out.transform.translation.y*scale_change;
+      //!tf2_broadcaster_.sendTransform(tf_msg_out);
+      //publish the transform to the output topic
+      //!output_transform_pub_.publish(tf_msg_out);
+      //!tf_msg_out.transform.translation.z = tf_msg_out.transform.translation.z *scale_change;
+      //!experimental_transform_pub_.publish(tf_msg_out);
+       //!END OF REMOVE
 
-      float scale_change = current_marker_size_/0.12; //default marker size
-
-
-
-
-      tf_msg_out.transform.translation.x = tf_msg_out.transform.translation.x*scale_change;
-      tf_msg_out.transform.translation.y = tf_msg_out.transform.translation.y*scale_change;
       tf2_broadcaster_.sendTransform(tf_msg_out);
       //publish the transform to the output topic
       output_transform_pub_.publish(tf_msg_out);
-
-      tf_msg_out.transform.translation.z = tf_msg_out.transform.translation.z *scale_change;
-      experimental_transform_pub_.publish(tf_msg_out);
-
-       //!END OF REMOVE
-
-
-
-
       marker_control(tf_msg_out.transform.translation.z);
     } else{
       ROS_INFO("Marker is not yet stable!");
@@ -233,7 +223,7 @@ void DecisionProcessNode::marker_control(const double marker_cam_distance){
     marker_family = aruco_multi;
     marker_id = 88;
     marker_size = std::min(marker_ideal_size, max_marker_size_);
-    marker_size = std::max(marker_size,0.02);
+    marker_size = std::max(marker_size,0.01);
 
 
 
@@ -334,10 +324,11 @@ void DecisionProcessNode::timer_set_marker_cb(const ros::TimerEvent&){
     req.marker_family = current_marker_family_;
     req.marker_id = current_marker_id_;
     req.marker_name = current_marker_frame_name_;
+    req.marker_size = current_marker_size_;
 
     //! ALERT REMOVE THIS ONLY FOR EXPERIMENT 2
     //! req.marker_size = marker_msg_to_display_.marker_size;
-    req.marker_size = 0.12;
+    //!req.marker_size = 0.12;
     //! END OF REMOVE
     ROS_INFO("Sending new marker to Aruco detection system (ar_sys), size: %f", req.marker_size);
     ROS_INFO("Setting the timer to wait for camera delay");
